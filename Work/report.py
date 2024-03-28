@@ -1,21 +1,27 @@
 # report.py
 #
-# Exercise 3_12
-import csv
+# Exercise 4_4
+import sys
 import fileparse 
+from stock import Stock
 
 def read_portfolio(filename):
     '''
-    Read a stock portfolio file into a list of dictionaries with keys
+    Read a stock portfolio file into a list of stock class with attribute;
     name, shares, and price.
     '''
-    return fileparse.parse_csv(filename, select=['name','shares','price'], types=[str,int,float])
+    with open(filename) as lines:
+        portdicts = fileparse.parse_csv(lines, select=['name','shares','price'], types=[str,int,float])
+
+    portfolio = [ Stock(d['name'], d['shares'], d['price']) for d in portdicts]
+    return(portfolio)
 
 def read_prices(filename):
     '''
     Read a CSV file of price data into a dict mapping names to prices.
-    '''
-    return dict(fileparse.parse_csv(filename,types=[str,float], has_headers=False))
+    ''' 
+    with open(filename) as lines:
+        return dict(fileparse.parse_csv(lines, types=[str,float], has_headers=False))
 
 
 def make_report(portfolio, prices):
@@ -23,41 +29,43 @@ def make_report(portfolio, prices):
 
     report = []
     for stock in portfolio:
-        current_price = prices[stock['name']]
-        change = current_price - stock['price']
-        summary = (stock['name'], stock['shares'], current_price, change)
+        current_price = prices[stock.name]
+        change = current_price - stock.price
+        summary = (stock.name, stock.shares, current_price, change)
         report.append(summary)
     return report   
 
-
 def print_report(report):
-    '''
-    prints the report when the functions is called.
-    '''
-    portfolio = read_portfolio('Data/portfoliodate.csv')
-    prices    = read_prices('Data/prices.csv')
-
-    # Calculate the total cost of the portfolio
-    total_cost = 0.0
-    for s in portfolio:
-        total_cost += s['shares']*s['price']
-    print('Total cost', total_cost)
-
-    # Compute the current value of the portfolio
-    total_value = 0.0
-    for s in portfolio:
-        total_value += s['shares']*prices[s['name']]
-    print('Current value', total_value)
-    print('Gain', total_value - total_cost)
-    # Output the report
-    report = make_report(portfolio, prices)  
-
+    '''print  a nicely formated table from a list of (name,shares, prices, change) tuples.'''
     headers = ('Name', 'Shares', 'Price', 'Change')
     print('%10s %10s %10s %10s' % headers)
     print(('-' * 10 + ' ') * len(headers))
     for row in report:
         print('%10s %10d %10.2f %10.2f' % row)
-    return row
 
+def portfolio_report(file1, file2):
+    '''
+    prints the report when the functions is called.
+    '''
+    portfolio = read_portfolio(file1)
+    prices    = read_prices(file2)
+
+    # Compute the current value of the portfolio
+    total_value = 0.0
+    for s in portfolio:
+        total_value += s.shares*prices[s.name]
+    # Output the report
+    report = make_report(portfolio, prices)  
+    print_report(report)
+
+def main(argv):
+    if len(sys.argv) != 3:
+       raise SystemExit('Usage: %s portfile pricefile' % argv[0])
+    report = make_report(argv[1], argv[2])
+    return(report)
+
+if __name__ == '__main__':
+    import sys
+    main(sys.argv)
 
 print('God lives in me')
