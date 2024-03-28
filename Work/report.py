@@ -1,44 +1,21 @@
 # report.py
 #
-# Exercise 2.4
+# Exercise 3_12
 import csv
+import fileparse 
 
 def read_portfolio(filename):
     '''
     Read a stock portfolio file into a list of dictionaries with keys
     name, shares, and price.
     '''
-    portfolio = []
-    with open(filename) as f:
-        rows = csv.reader(f)
-        headers = next(rows)
-
-        for row in rows:
-            record = dict(zip(headers, row))
-            stock = {
-                 'name'   : record['name'],
-                 'shares' : int(record['shares']),
-                 'price'   : float(record['price'])
-            }
-            portfolio.append(stock)
-
-    return portfolio
-
+    return fileparse.parse_csv(filename, select=['name','shares','price'], types=[str,int,float])
 
 def read_prices(filename):
     '''
     Read a CSV file of price data into a dict mapping names to prices.
     '''
-    prices = {}
-    with open(filename) as f:
-        rows = csv.reader(f)
-        for row in rows:
-            try:
-                prices[row[0]] = float(row[1])
-            except IndexError:
-                pass
-
-    return prices
+    return dict(fileparse.parse_csv(filename,types=[str,float], has_headers=False))
 
 
 def make_report(portfolio, prices):
@@ -81,7 +58,6 @@ def print_report(report):
     for row in report:
         print('%10s %10d %10.2f %10.2f' % row)
     return row
-
 
 
 print('God lives in me')
