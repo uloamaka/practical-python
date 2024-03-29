@@ -13,4 +13,11 @@ class Stock:
     def sell(self, nshares):
         '''sell a number of shares''' 
         self.shares -= nshares
+
+class MyStock(Stock):
+    '''subclass of the Stock class'''
+    def panic(self):
+        self.sell(self.shares)        
         
+    def cost(self):
+        return 1.25 * self.shares * self.price        
